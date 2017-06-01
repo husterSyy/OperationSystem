@@ -1,0 +1,12 @@
+config_interface: textconfig
+romimage: file=/usr/share/bochs/BIOS-bochs-latest
+megs: 8
+vgaromimage: file=/usr/share/vgabios/vgabios.bin
+floppya: 1_44=./fd.img, status=inserted
+boot: a
+ips: 1000000
+log:./bochs.out
+vga_update_interval: 300000
+keyboard_serial_delay: 250
+keyboard_paste_delay: 100000
+private_colormap: enabled=0

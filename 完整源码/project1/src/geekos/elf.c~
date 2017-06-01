@@ -1,0 +1,75 @@
+/*
+ * ELF executable loading
+ * Copyright (c) 2003, Jeffrey K. Hollingsworth <hollings@cs.umd.edu>
+ * Copyright (c) 2003, David H. Hovemeyer <daveho@cs.umd.edu>
+ * $Revision: 1.29 $
+ * 
+ * This is free software.  You are permitted to use,
+ * redistribute, and modify it as specified in the file "COPYING".
+ */
+
+#include <geekos/errno.h>
+#include <geekos/kassert.h>
+#include <geekos/ktypes.h>
+#include <geekos/screen.h>  /* for debug Print() statements */
+#include <geekos/pfat.h>
+#include <geekos/malloc.h>
+#include <geekos/string.h>
+#include <geekos/elf.h>
+
+
+/**
+ * From the data of an ELF executable, determine how its segments
+ * need to be loaded into memory.
+ * @param exeFileData buffer containing the executable file
+ * @param exeFileLength length of the executable file in bytes
+ * @param exeFormat structure describing the executable's segments
+ *   and entry address; to be filled in
+ * @return 0 if successful, < 0 on error
+ */
+int Parse_ELF_Executable(char *exeFileData, ulong_t exeFileLength,
+    struct Exe_Format *exeFormat)
+{
+   // TODO("Parse an ELF executable image");
+
+
+char *p; /* pointer of current position */  
+int i; /* for iterate segments */  
+/* segment number */  
+p = exeFileData + 0x2C;  
+exeFormat->numSegments = *((unsigned short*)p);  
+/* code entry point addr*/  
+p = exeFileData + 0x18;  
+exeFormat->entryAddr = *((unsigned int*)p);  
+/* program header offset */  
+unsigned int phoff;  
+p = exeFileData + 0x1C;  
+phoff = *((unsigned int*)p);  
+p = exeFileData + phoff;  
+/* fill segments */  
+for (i = 0; i < exeFormat->numSegments; i++) {  
+   unsigned int p_type, p_offset, p_vaddr, p_paddr, p_filesz, p_memsz, p_flags, p_align;  
+   p_type = *((unsigned int*)p);p += 4;  
+    p_offset = *((unsigned int*)p);p += 4;  
+    p_vaddr = *((unsigned int*)p);p += 4;  
+    p_paddr = *((unsigned int*)p);p += 4;  
+    p_filesz = *((unsigned int*)p);p += 4;  
+    p_memsz = *((unsigned int*)p);p += 4;  
+    p_flags = *((unsigned int*)p);p += 4;  
+    p_align = *((unsigned int*)p);p += 4;  
+    exeFormat->segmentList[i].offsetInFile = p_offset; /* Offset of segment in executable file */  
+   exeFormat->segmentList[i].lengthInFile = p_filesz; /* Length of segment data in executable file */  
+    exeFormat->segmentList[i].startAddress = p_vaddr; /* Start address of segment in user memory */  
+   exeFormat->segmentList[i].sizeInMemory = p_memsz; /* Size of segment in memory */  
+   exeFormat->segmentList[i].protFlags = 0; /* VM protection flags; combination of VM_READ,VM_WRITE,VM_EXEC */  
+}  
+return 0;  
+
+
+
+
+ 
+
+
+}
+
